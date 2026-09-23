@@ -7,7 +7,7 @@ for i = 1:numel(xValues)
         errors(i,j) = abs(sin(xValues(i))-numapprox.sinTaylorRecurrence(xValues(i),degrees(j)));
     end
 end
-[minErrors, minIndex] = min(errors,[],2); minDegrees = degrees(minIndex(:));
+[minErrors, minIndex] = min(errors,[],2); minDegrees = degrees(minIndex(:)); minDegrees = minDegrees(:);
 figure('Color','w'); semilogy(degrees,errors.','o-','LineWidth',1.2); grid on;
 xlabel('Highest retained odd power'); ylabel('Absolute error');
 legend('x = 0.1','x = 1','x = 3','x = 7','Location','southwest');
