@@ -2,7 +2,7 @@ classdef TestTaylorApproximation < matlab.unittest.TestCase
     methods (TestClassSetup)
         function addSource(testCase)
             root = fileparts(fileparts(mfilename('fullpath')));
-            addpath(fullfile(root,'src')); testCase.TestData.root = root;
+            addpath(fullfile(root,'src'));
         end
     end
     methods (Test)
