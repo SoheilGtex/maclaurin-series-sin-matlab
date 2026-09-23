@@ -1,0 +1,13 @@
+# MATLAB generated files
+*.asv
+*.m~
+*.autosave
+*.mat
+
+# Machine-specific raw experiment output
+results/raw/*.csv
+
+# Temporary OS/editor files
+.DS_Store
+.vscode/
+.idea/

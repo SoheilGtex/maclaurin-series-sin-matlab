@@ -1,0 +1,47 @@
+name: MATLAB Tests and Reproduction
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: matlab-actions/setup-matlab@v3
+      - uses: matlab-actions/run-tests@v3
+        with:
+          source-folder: src
+          select-by-folder: tests
+          test-results-junit: test-results/results.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: matlab-test-results
+          path: test-results/results.xml
+          if-no-files-found: ignore
+
+  reproduce:
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: matlab-actions/setup-matlab@v3
+      - uses: matlab-actions/run-command@v3
+        with:
+          command: "addpath('src'); addpath('experiments'); generateAllFigures;"
+      - name: Verify expected generated artifacts
+        shell: bash
+        run: |
+          test -s results/raw/convergence.csv
+          test -s results/raw/range_reduction.csv
+          test -s results/reference/benchmark_sweep.csv
+          test -s results/figures/accuracy_performance.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: numerical-sine-approximation-results
+          path: results/
+          if-no-files-found: error
