@@ -1,82 +1,67 @@
-# Maclaurin Series Demo for sin(x) (MATLAB)
+# Numerical Approximation of the Sine Function in MATLAB
 
-A self-contained MATLAB demo illustrating **Maclaurin series approximations of sin(x)** using a fully numerical approach (no Symbolic Toolbox required).
+This repository studies how mathematically equivalent-looking approximations of `sin(x)` behave under finite-precision arithmetic. The project question is: **how accurately and efficiently can sine be approximated when algorithm design, range reduction, basis choice, and floating-point effects are all considered?** MATLAB's built-in `sin` is the practical reference implementation; this project does not claim to replace it.
 
-The script visualizes approximation quality, error behavior, convergence via an animated GIF, a 3D error surface, and includes a classic **non-analytic counterexample** where the Maclaurin series fails.
+## Methods
 
----
+| Method | Main idea |
+|---|---|
+| Direct Taylor | Explicit powers and factorials as a transparent baseline. |
+| Recurrence Taylor | Reuses consecutive terms to avoid repeated powers and factorials. |
+| Reduced Taylor | Reduces arguments to approximately `[-pi/4, pi/4]` and reconstructs by quadrant symmetry. |
+| Chebyshev | Computes interval-specific coefficients from Chebyshev nodes. |
+| Clenshaw | Evaluates Chebyshev expansions by backward recurrence. |
 
-## Features
+The numerical routines validate finite real inputs and evaluate them in MATLAB double precision; compatible numeric inputs may be converted to double by MATLAB argument validation. The simple range reducer is intended for moderate arguments, not arbitrary huge arguments or correctly rounded argument reduction.
 
-- Overlay plots of `sin(x)` and multiple Maclaurin polynomials  
-- Approximation vs absolute error for a selected polynomial degree  
-- Animated GIF showing convergence as the degree increases  
-- Comparison of true error with the “next-term” error proxy  
-- 3D surface plot: error vs `x` and number of included terms  
-- Non-analytic counterexample at `x = 0` where the Maclaurin series fails  
+## Key mathematical ideas
 
----
+The study connects Taylor remainder bounds, interval approximation, cancellation, range reduction, recurrence evaluation, Clenshaw evaluation, machine spacing, unit roundoff `u = eps/2`, and accuracy–runtime trade-offs. Safeguarded relative error near a zero of sine is reported separately from ordinary relative error because its denominator is `max(abs(reference),eps)`.
 
-## File
+## Repository structure
 
-- **`maclaurin_sin_demo.m`**
+- `src/+numapprox`: reusable numerical algorithms.
+- `tests`: `matlab.unittest` tests, including invalid-input and shape tests.
+- `experiments`: convergence, range-reduction, Chebyshev, and floating-point studies.
+- `benchmarks`: degree-sweep accuracy/runtime benchmark.
+- `report`: [technical study](report/numerical_approximation_study.md).
+- `results/raw`: generated machine-specific outputs.
+- `results/reference`: selected outputs suitable for review after real execution.
+- `results/figures`: generated plots.
+- `.github/workflows`: MATLAB test and reproduction workflows.
 
----
+## Quick start and tests
 
-## Requirements
-
-- MATLAB (standard installation)
-- No Symbolic Math Toolbox required
-- Uses built-in MATLAB functions for plotting and GIF generation
-
----
-
-## How to Run
-
-1. Open MATLAB and set the **Current Folder** to the project directory.
-2. Run the script:
+From the repository root in MATLAB:
 
 ```matlab
-maclaurin_sin_demo
+addpath('src');
+results = runtests('tests', 'IncludeSubfolders', true);
+assert(all([results.Passed]), 'One or more tests failed.');
 ```
 
-The script will generate several figures and optionally save a GIF file in the current folder.
+The tests cover zero, positive and negative inputs, row/column/matrix shapes, odd symmetry, degree handling, range-reduction boundaries, invalid intervals, non-finite inputs, Chebyshev coefficient sizes, known Chebyshev polynomials, Clenshaw, error metrics, and Taylor remainder bounds.
 
----
+## Reproducing experiments
 
-## Output
+`generateAllFigures` is a function, so add its directory and call it directly:
 
-- Multiple MATLAB figures:
-  - `sin(x)` vs Maclaurin approximations
-  - Approximation and absolute error (two-panel plot)
-  - Error vs next-term proxy
-  - 3D error surface
-  - Non-analytic counterexample plot
-- Animated GIF:
-  - `maclaurin_sin.gif` (if enabled)
+```matlab
+addpath('src');
+addpath('experiments');
+generateAllFigures;
+```
 
----
+This generates raw CSV files, selected reference CSV summaries, and PNG figures under `results/`. It also runs the benchmark degree sweep. The workflow can run the same entry point on demand and uploads the generated files as an artifact; it does not commit generated files automatically.
 
-## Configuration
+## Results status
 
-You can easily customize the demo by editing the parameters at the top of the script:
+**RESULTS PENDING MATLAB EXECUTION in this sandbox.** No numerical benchmark, CSV, or figure is claimed here unless generated by MATLAB. After local or GitHub Actions execution, selected genuine outputs can be copied from `results/raw` to `results/reference` and committed deliberately.
 
-- Domain and resolution of `x`
-- Polynomial degrees used for approximation
-- Degree used for error analysis
-- GIF generation options (enable/disable, delay time)
-- 3D error surface resolution
+## Limitations
 
----
-
-## Notes
-
-- The “next-term proxy” provides an intuitive estimate of the error near `x = 0`, but it is **not a strict bound** for all `x`.
-- The non-analytic example demonstrates that even when all derivatives at a point exist and are zero, the Maclaurin series may still fail to represent the function.
-
----
+The range reducer uses nearest-integer arithmetic with MATLAB's `pi` and is documented only for moderate arguments. Chebyshev coefficients are interval-specific and are not intended for extrapolation. Runtime depends on MATLAB release, hardware, JIT warm-up, and vector size. The experiment scripts are evidence-generation tools, not production replacements for MATLAB's numerical library.
 
 ## License
 
-MIT License (recommended).  
-Feel free to use, modify, and share for educational purposes.
+MIT. See [LICENSE](LICENSE).
