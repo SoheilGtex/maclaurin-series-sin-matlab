@@ -14,4 +14,6 @@ exportgraphics(gcf,fullfile(root,'results','figures','chebyshev_error_profiles.p
 figure('Color','w'); semilogy(degrees,maxTaylor,'o-',degrees,maxCheb,'s-','LineWidth',1.2); grid on;
 xlabel('Degree'); ylabel('Maximum absolute error'); legend('Taylor','Chebyshev'); title('Interval error comparison');
 exportgraphics(gcf,fullfile(root,'results','figures','taylor_vs_chebyshev.png'),'Resolution',180);
-writematrix([degrees; maxTaylor; maxCheb].',fullfile(root,'results','reference','chebyshev_summary.csv'));
+summaryTable = table(degrees(:), maxTaylor(:), maxCheb(:), ...
+    'VariableNames', {'degree','maxTaylorAbsoluteError','maxChebyshevAbsoluteError'});
+writetable(summaryTable,fullfile(root,'results','reference','chebyshev_summary.csv'));
